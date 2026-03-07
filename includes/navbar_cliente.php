@@ -225,7 +225,7 @@ if (!empty($_SESSION['id_usuario'])) {
         border-radius: 8px;
         margin: 0 8px 0 24px;
     }
-    .sidebar .submenu.show { max-height: 300px; }
+    .sidebar .submenu.show { max-height: 500px; }
 
     .sidebar .submenu-item {
         padding: 10px 24px 10px 52px;
@@ -336,32 +336,56 @@ if (!empty($_SESSION['id_usuario'])) {
             <i class="fas fa-images"></i> Galería
         </a>
         
-        
-        
         <!-- MENÚ AR -->
-<div class="menu-item" onclick="toggleSubmenu('sub-ar')">
-    <i class="fas fa-vr-cardboard"></i> AR
-    <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
-</div>
+        <div class="menu-item" onclick="toggleSubmenu('sub-ar')">
+            <i class="fas fa-vr-cardboard"></i> AR
+            <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+        </div>
 
-<div class="submenu <?= ($pagina == 'subir_marcadores.php' || $pagina == 'entorno_ar.php' || $pagina == 'lista_marcadores.php') ? 'show' : '' ?>" id="sub-ar">
-    
-    <a href="subir_marcadores.php" 
-       class="submenu-item <?= ($pagina == 'subir_marcadores.php') ? 'active' : '' ?>">
-        <i class="fas fa-upload"></i> Subir Marcadores
-    </a>
+        <div class="submenu <?= ($pagina == 'subir_marcadores.php' || $pagina == 'entorno_ar.php' || $pagina == 'lista_marcadores.php') ? 'show' : '' ?>" id="sub-ar">
+            <a href="subir_marcadores.php" class="submenu-item <?= ($pagina == 'subir_marcadores.php') ? 'active' : '' ?>">
+                <i class="fas fa-upload"></i> Subir Marcadores
+            </a>
+            <a href="lista_marcadores.php" class="submenu-item <?= ($pagina == 'lista_marcadores.php') ? 'active' : '' ?>">
+                <i class="fas fa-list-ul"></i> Listado de Marcadores
+            </a>
+            <a href="entorno_ar.php" class="submenu-item <?= ($pagina == 'entorno_ar.php') ? 'active' : '' ?>">
+                <i class="fas fa-cube"></i> Entorno AR Real
+            </a>
+        </div>
 
-    <a href="lista_marcadores.php" 
-       class="submenu-item <?= ($pagina == 'lista_marcadores.php') ? 'active' : '' ?>">
-        <i class="fas fa-list-ul"></i> Listado de Marcadores
-    </a>
+        <!-- MENÚ XR -->
+        <div class="menu-item" onclick="toggleSubmenu('sub-xr')">
+            <i class="fas fa-vr-cardboard"></i> XR
+            <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+        </div>
 
-    <a href="entorno_ar.php" 
-       class="submenu-item <?= ($pagina == 'entorno_ar.php') ? 'active' : '' ?>">
-        <i class="fas fa-cube"></i> Entorno AR Real
-    </a>
-
-</div>
+        <div class="submenu <?= ($pagina == 'editor_xr_foto_360.php' || $pagina == 'editor_xr_video_360.php' || $pagina == 'editor_xr_modelo_3d.php' || $pagina == 'galeria_xr_foto_360.php' || $pagina == 'galeria_xr_video_360.php' || $pagina == 'galeria_xr_modelo_3d.php') ? 'show' : '' ?>" id="sub-xr">
+            <!-- EDITOR XR -->
+            <a href="editor_xr_foto_360.php" class="submenu-item <?= ($pagina == 'editor_xr_foto_360.php') ? 'active' : '' ?>">
+                <i class="fas fa-camera"></i> EDITOR XR FOTO 360
+            </a>
+            <a href="editor_xr_video_360.php" class="submenu-item <?= ($pagina == 'editor_xr_video_360.php') ? 'active' : '' ?>">
+                <i class="fas fa-video"></i> EDITOR XR VIDEO 360
+            </a>
+            <a href="editor_xr_modelo_3d.php" class="submenu-item <?= ($pagina == 'editor_xr_modelo_3d.php') ? 'active' : '' ?>">
+                <i class="fas fa-cube"></i> EDITOR XR MODELO 3D
+            </a>
+            
+            <!-- Separador visual (línea) -->
+            <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 8px 24px;"></div>
+            
+            <!-- GALERIA XR -->
+            <a href="galeria_xr_foto_360.php" class="submenu-item <?= ($pagina == 'galeria_xr_foto_360.php') ? 'active' : '' ?>">
+                <i class="fas fa-images"></i> GALERIA XR FOTO 360
+            </a>
+            <a href="galeria_xr_video_360.php" class="submenu-item <?= ($pagina == 'galeria_xr_video_360.php') ? 'active' : '' ?>">
+                <i class="fas fa-film"></i> GALERIA XR VIDEO 360
+            </a>
+            <a href="galeria_xr_modelo_3d.php" class="submenu-item <?= ($pagina == 'galeria_xr_modelo_3d.php') ? 'active' : '' ?>">
+                <i class="fas fa-cubes"></i> GALERIA XR MODELO 3D
+            </a>
+        </div>
 
         <div class="menu-item" onclick="toggleSubmenu('sub-perfil')">
             <i class="fas fa-user"></i> Mi Perfil
@@ -405,19 +429,16 @@ if (!empty($_SESSION['id_usuario'])) {
 
     document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
 
-
-    // ESTO VERIFICA CADA 5 SEGUNDOS SI ALGUIEN MÁS INICIÓ SESIÓN
     // ESTO VERIFICA CADA 5 SEGUNDOS SI ALGUIEN MÁS INICIÓ SESIÓN
     setInterval(function() {
         fetch('includes/seguridad.php') 
-        .then(response => response.text()) // Leemos la respuesta de seguridad.php como texto
+        .then(response => response.text())
         .then(data => {
-            // Buscamos si la respuesta del servidor contiene la frase de expulsión
             if (data.includes('Tu sesión fue cerrada')) {
                 alert('Tu sesión fue cerrada porque se inició sesión desde otro dispositivo.');
-                window.location.href = 'index.html'; // Lo mandamos afuera
+                window.location.href = 'index.html';
             }
         })
         .catch(e => console.log('Verificando estado de la sesión...'));
-    }, 5000); // 5000 milisegundos = 5 segundos
+    }, 5000);
 </script>
