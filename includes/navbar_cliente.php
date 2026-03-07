@@ -93,23 +93,12 @@ if (!empty($_SESSION['id_usuario'])) {
         gap: 12px;
     }
     
-    /* Logo circular con fondo blanco y logo1.png */
-    .sidebar .logo-circle {
-        width: 60px;
-        height: 60px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        overflow: hidden;
-    }
-    
-    .sidebar .logo-circle img {
-        width: 100%;
-        height: 100%;
+    /* Logo en tamaño normal (sin círculo) */
+    .sidebar .logo-container img {
+        max-width: 100%;
+        height: auto;
+        max-height: 80px;
+        width: auto;
         object-fit: contain;
     }
     
@@ -284,9 +273,7 @@ if (!empty($_SESSION['id_usuario'])) {
 
 <div class="sidebar" id="sidebar">
     <div class="logo-container">
-        <div class="logo-circle">
-            <img src="<?= htmlspecialchars($logo_empresa) ?>?t=<?= time() ?>" alt="Logo Empresa">
-        </div>
+        <img src="<?= htmlspecialchars($logo_empresa) ?>?t=<?= time() ?>" alt="Logo Empresa">
         <div class="logo-text">
             <?= htmlspecialchars($nombre_empresa) ?>
         </div>
@@ -350,7 +337,7 @@ if (!empty($_SESSION['id_usuario'])) {
                 <i class="fas fa-list-ul"></i> Listado de Marcadores
             </a>
             <a href="entorno_ar.php" class="submenu-item <?= ($pagina == 'entorno_ar.php') ? 'active' : '' ?>">
-                <i class="fas fa-cube"></i> Entorno AR Real
+                <i class="fas fa-cube"></i> Entorno AR con Marcadores
             </a>
         </div>
 
