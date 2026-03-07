@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KunturVR - Mining Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- A-Frame library for 360° interactivity -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #023675;
+            --accent: #00d4ff;
+            --dark: #011f44;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-glow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif; 
+            overflow-x: hidden;
+            background-color: #0b111e; 
+            color: #fff;
+        }
+
+        /* --- Header Glassmorphism --- */
+        header {
+            width: 100%;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed; 
+            top: 0;
+            z-index: 1000;
+            background: rgba(2, 54, 117, 0.85);
+            backdrop-filter: blur(10px); 
+            border-bottom: 1px solid var(--glass-border);
+            transition: 0.3s;
+        }
+
+        .logo-img {
+            height: 100px; 
+            width: auto;
+            margin: -15px 0;
+            filter: drop-shadow(0 0 5px rgba(0, 212, 255, 0.3));
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--accent);
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        .btn-info {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 8px 25px;
+            border: 2px solid var(--accent);
+            border-radius: 4px; 
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-info:hover {
+            background: var(--accent);
+            color: var(--dark);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        }
+
+        /* --- Hero Section --- */
+        .hero-section {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #background-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(1, 31, 68, 0.085), rgba(1, 31, 68, 0.123)), 
+                        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 212, 255, 0.05) 3px);
+            background-size: cover;
+            z-index: 2;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 3;
+            position: relative;
+            padding: 20px;
+        }
+
+        .main-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 2px 2px 0px var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        .main-title::before,
+        .main-title::after {
+            content: 'KunturVR';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #011f4400; 
+        }
+
+        .main-title::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        .main-title::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        .subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--accent);
+            display: inline-block;
+            padding-bottom: 10px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .hero-btn-login {
+            display: inline-block;
+            padding: 18px 60px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent);
+            text-decoration: none;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--accent);
+            backdrop-filter: blur(5px);
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-btn-login:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 30px var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            animation: bounce 2s infinite;
+            opacity: 0.7;
+        }
+        
+        .scroll-down span {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border-bottom: 2px solid var(--accent);
+            border-right: 2px solid var(--accent);
+            transform: rotate(45deg);
+            margin: -10px;
+        }
+
+        /* --- Info Section Mejorada --- */
+        .info-section {
+            padding: 120px 10%;
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            background: radial-gradient(circle at center, #0b2b5a 0%, #000814 100%);
+            position: relative;
+        }
+        .section-plain {
+             padding: 120px 10%;
+             background: radial-gradient(circle at center, #0b2b5a 0%, #000814 100%);
+             position: relative;
+        }
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 42px;
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: var(--text-glow);
+        }
+        .section-subtitle {
+            font-size: 28px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        .info-bg-decoration {
+            position: absolute;
+            top: 20%;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            filter: blur(150px);
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .info-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+        
+        .info-image::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(0,212,255,0.2) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1;
+            animation: pulse-glow 3s infinite;
+        }
+
+        .info-image img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .info-texts {
+            flex: 1;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .card-info {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--accent);
+            border-radius: 10px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0; 
+            transform: translateY(30px);
+        }
+        
+        .card-info.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-info:hover {
+            transform: translateX(10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-info:hover h3 {
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        .card-info h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            font-size: 22px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .card-info p {
+            color: #ccc;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        /* Estilo para las nuevas secciones de doble columna */
+        .dual-section {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+        .dual-section .content {
+            flex: 1;
+        }
+        .dual-section .media {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        /* Visor 360 interactivo con A-Frame - para imagen 360 */
+        .aframe-360-container {
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0,212,255,0.3);
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+        .aframe-360-container a-scene {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        /* Visor 3D interactivo para modelos GLB */
+        .aframe-3d-container {
+            width: 100%;
+            max-width: 500px;
+            height: 350px;
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0,212,255,0.3);
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+        .aframe-3d-container a-scene {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Botones CTA originales */
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .btn-cta {
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+        .btn-cta:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        /* --- NUEVO ESTILO PARA SECCIÓN DEMO --- */
+        .demo-showcase {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin: 50px 0 30px;
+        }
+        .demo-card {
+            background: rgba(0, 20, 40, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 24px;
+            padding: 35px 30px;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 2px rgba(0,212,255,0.1) inset;
+            transition: 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--accent), #ff00c1, var(--accent));
+            opacity: 0;
+            transition: 0.4s;
+            z-index: -2;
+            border-radius: 24px;
+        }
+        .demo-card:hover::before {
+            opacity: 0.4;
+        }
+        .demo-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 50px rgba(0,212,255,0.3);
+            border-color: transparent;
+        }
+        .demo-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: inline-block;
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+        .demo-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .demo-card p {
+            color: #ddd;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .whatsapp-block {
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 60px;
+            padding: 25px 35px;
+            max-width: 600px;
+            margin: 50px auto 0;
+            border: 1px solid rgba(0,212,255,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(5px);
+        }
+        .whatsapp-label {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .whatsapp-contact {
+            font-size: 26px;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .whatsapp-contact span {
+            color: var(--accent);
+            font-weight: 300;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            padding: 14px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid transparent;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+            margin-top: 10px;
+        }
+        .btn-whatsapp:hover {
+            background: transparent;
+            border-color: #25D366;
+            color: #25D366;
+            box-shadow: 0 0 20px #25D366;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background: #000814;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(0, 212, 255, 0.3);
+            position: relative;
+        }
+
+        footer p:first-child {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        /* --- Animaciones Keyframes --- */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+            100% { opacity: 0.5; transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(26px, 9999px, 81px, 0); transform: skew(0.85deg); }
+            5% { clip: rect(74px, 9999px, 86px, 0); transform: skew(0.2deg); }
+            10% { clip: rect(6px, 9999px, 20px, 0); transform: skew(0.04deg); }
+            15% { clip: rect(15px, 9999px, 97px, 0); transform: skew(0.04deg); }
+            20% { clip: rect(86px, 9999px, 12px, 0); transform: skew(0.8deg); }
+            25% { clip: rect(100px, 9999px, 84px, 0); transform: skew(0.57deg); }
+            30% { clip: rect(16px, 9999px, 5px, 0); transform: skew(0.89deg); }
+            35% { clip: rect(69px, 9999px, 16px, 0); transform: skew(0.38deg); }
+            40% { clip: rect(44px, 9999px, 3px, 0); transform: skew(0.24deg); }
+            45% { clip: rect(5px, 9999px, 90px, 0); transform: skew(0.12deg); }
+            50% { clip: rect(6px, 9999px, 14px, 0); transform: skew(0.57deg); }
+            55% { clip: rect(66px, 9999px, 22px, 0); transform: skew(0.04deg); }
+            60% { clip: rect(68px, 9999px, 100px, 0); transform: skew(0.24deg); }
+            65% { clip: rect(25px, 9999px, 21px, 0); transform: skew(0.48deg); }
+            70% { clip: rect(78px, 9999px, 73px, 0); transform: skew(0.12deg); }
+            75% { clip: rect(22px, 9999px, 60px, 0); transform: skew(0.97deg); }
+            80% { clip: rect(32px, 9999px, 14px, 0); transform: skew(0.05deg); }
+            85% { clip: rect(98px, 9999px, 5px, 0); transform: skew(0.79deg); }
+            90% { clip: rect(71px, 9999px, 28px, 0); transform: skew(0.23deg); }
+            95% { clip: rect(33px, 9999px, 59px, 0); transform: skew(0.04deg); }
+            100% { clip: rect(80px, 9999px, 89px, 0); transform: skew(0.68deg); }
+        }
+
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); transform: skew(0.44deg); }
+            5% { clip: rect(59px, 9999px, 14px, 0); transform: skew(0.16deg); }
+            10% { clip: rect(43px, 9999px, 5px, 0); transform: skew(0.88deg); }
+            15% { clip: rect(61px, 9999px, 4px, 0); transform: skew(0.26deg); }
+            20% { clip: rect(59px, 9999px, 17px, 0); transform: skew(0.96deg); }
+            25% { clip: rect(4px, 9999px, 99px, 0); transform: skew(0.33deg); }
+            30% { clip: rect(21px, 9999px, 72px, 0); transform: skew(0.93deg); }
+            35% { clip: rect(10px, 9999px, 24px, 0); transform: skew(0.23deg); }
+            40% { clip: rect(36px, 9999px, 64px, 0); transform: skew(0.6deg); }
+            45% { clip: rect(81px, 9999px, 59px, 0); transform: skew(0.53deg); }
+            50% { clip: rect(64px, 9999px, 12px, 0); transform: skew(0.2deg); }
+            55% { clip: rect(83px, 9999px, 31px, 0); transform: skew(0.21deg); }
+            60% { clip: rect(63px, 9999px, 35px, 0); transform: skew(0.08deg); }
+            65% { clip: rect(15px, 9999px, 2px, 0); transform: skew(0.06deg); }
+            70% { clip: rect(98px, 9999px, 93px, 0); transform: skew(0.44deg); }
+            75% { clip: rect(12px, 9999px, 15px, 0); transform: skew(0.91deg); }
+            80% { clip: rect(5px, 9999px, 93px, 0); transform: skew(0.26deg); }
+            85% { clip: rect(22px, 9999px, 3px, 0); transform: skew(0.35deg); }
+            90% { clip: rect(45px, 9999px, 5px, 0); transform: skew(0.4deg); }
+            95% { clip: rect(49px, 9999px, 68px, 0); transform: skew(0.31deg); }
+            100% { clip: rect(52px, 9999px, 32px, 0); transform: skew(0.18deg); }
+        }
+
+        @media (max-width: 992px) {
+            .info-section, .dual-section { 
+                flex-direction: column; 
+                text-align: center; 
+                padding: 100px 5%;
+            }
+            .card-info { 
+                border-left: 1px solid rgba(255,255,255,0.1); 
+                border-top: 4px solid var(--accent); 
+            }
+            .main-title { font-size: 50px; }
+            .info-image img { width: 70%; max-width: 300px; }
+        }
+
+        @media (max-width: 480px) {
+            .main-title { font-size: 38px; letter-spacing: 2px; }
+            .subtitle { font-size: 16px; letter-spacing: 3px; }
+            .hero-btn-login { padding: 15px 40px; }
+            header { padding: 15px 20px; }
+            .logo-img { height: 60px; }
+            nav { gap: 15px; }
+            .btn-info { padding: 6px 15px; font-size: 12px; }
+            .section-title { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="imagenes/logo.png" alt="KunturVR Logo" class="logo-img">
+        </div>
+        <nav>
+            <a href="#info" class="btn-info">Explorar</a>
+            <a href="login.php" class="nav-link">Acceso</a>
+        </nav>
+    </header>
+    
+    <div class="hero-section">
+        <video autoplay muted loop playsinline id="background-video">
+            <source src="imagenes/fondo-mineria.mp4" type="video/mp4">
+            <div class="video-fallback" style="background-image: linear-gradient(rgba(2, 54, 117, 0.3), rgba(2, 54, 117, 0.6)), url('imagenes/fondo1.png');"></div>
+        </video>
+        
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <div class="main-title" data-text="KunturVR">KunturVR</div>
+            <br>
+            <p class="subtitle">Next-Gen Mining Solutions</p>
+            <br>
+            <a href="login.php" class="hero-btn-login">LOGIN SYSTEM</a>
+        </div>
+
+        <div class="scroll-down">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Sección original (Simulación, Gemelos, Data) -->
+    <section class="info-section" id="info">
+        <div class="info-bg-decoration"></div>
+
+        <div class="info-image">
+            <img src="imagenes/minero1.png" alt="Minería Digital VR">
+        </div>
+        
+        <div class="info-texts">
+            <div class="card-info">
+                <h3>Simulación Inmersiva</h3>
+                <p>Implementamos entornos virtuales de **Grado Militar** para el entrenamiento en seguridad minera. Reducción de riesgos operativos validada del 90% mediante escenarios de estrés controlado.</p>
+            </div>
+            <div class="card-info">
+                <h3>Gemelos Digitales</h3>
+                <p>Nuestra tecnología VR proyecta depósitos y planifica excavaciones con precisión sub-milimétrica. Visualice el futuro de su operación antes de mover una sola tonelada de tierra.</p>
+            </div>
+            <div class="card-info" style="border-left-color: #ff00c1;">
+                <h3>Data Analytics 3D</h3>
+                <p>Integración en tiempo real de datos topográficos. Transformamos hojas de cálculo complejas en visualizaciones espaciales intuitivas para la toma de decisiones crítica.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 📍 ¿Qué es Kuntur-VR? -->
+    <section class="section-plain">
+        <h2 class="section-title">📍 ¿Qué es Kuntur-VR?</h2>
+        <div class="dual-section">
+            <div class="media">
+                <img src="imagenes/2.png" alt="Kuntur-VR Platform" style="max-width: 100%; border-radius: 10px; border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(0,212,255,0.3);">
+            </div>
+            <div class="content">
+                <div class="card-info visible" style="border-left-color: var(--accent);">
+                    <p style="font-size: 18px; line-height: 1.8;">Kuntur-VR es una plataforma diseñada para empresas que necesitan administrar y compartir recursos visuales e inmersivos de manera eficiente. Permite organizar activos digitales por zonas geográficas, proyectos o áreas operativas, facilitando su acceso, visualización y distribución. Con Kuntur-VR, los equipos pueden explorar entornos, infraestructuras y recursos desde cualquier lugar con experiencias inmersivas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🎬 Tipos de contenido soportado - CORREGIDO: modelo GLB rotado para que no esté de cabeza -->
+    <section class="section-plain">
+        <h2 class="section-title">🎬 Tipos de contenido soportado</h2>
+        <div class="dual-section">
+            <div class="content">
+                <div class="card-info visible" style="border-left-color: #ff00c1;">
+                    <p>📷 Imágenes y fotografías panorámicas<br>
+                    🌐 Fotos 360°<br>
+                    🎞️ Videos convencionales<br>
+                    🎬 Videos 360° inmersivos<br>
+                    📦 Modelos 3D (.GLB) optimizados para AR/VR<br>
+                    🔗 Escenas interactivas con puntos de información</p>
+                </div>
+            </div>
+            <div class="media">
+                <!-- Visor 3D interactivo para modelo GLB - AHORA CON ROTACIÓN CORREGIDA (180° en X) -->
+                <div class="aframe-3d-container">
+                    <a-scene embedded vr-mode-ui="enabled: false" loading-screen="enabled: false" renderer="colorManagement: true;" background="color: #111122">
+                        <a-assets>
+                            <a-asset-item id="modelo-3d" src="imagenes/3.glb"></a-asset-item>
+                        </a-assets>
+                        
+                        <!-- Cámara con controles de órbita (permite rotar y hacer zoom) -->
+                        <a-entity camera position="0 1.6 3" look-controls="enabled: false" orbit-controls="target: 0 1 0; enableZoom: true; enablePan: false; rotateSpeed: 0.5;"></a-entity>
+                        
+                        <!-- Luces para iluminar el modelo -->
+                        <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
+                        <a-light type="directional" color="#ffffff" intensity="1.2" position="1 2 1"></a-light>
+                        
+                        <!-- Modelo 3D con rotación corregida (180 grados en X para que no esté de cabeza) -->
+                        <a-entity gltf-model="#modelo-3d" position="0 0.5 0" scale="1.5 1.5 1.5" rotation="180 0 0" animation="property: rotation; to: 180 360 0; loop: true; dur: 20000; easing: linear;"></a-entity>
+                    </a-scene>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Casos de uso + Visor 360 normal con imagen 360° - CORREGIDO: con cursor interactivo -->
+    <section class="section-plain">
+        <h2 class="section-title">Casos de uso</h2>
+        <div class="dual-section">
+            <div class="media">
+                <!-- Visor 360 interactivo con imagen esférica (foto 360) - AHORA CON CURSOR PARA NAVEGAR -->
+                <div class="aframe-360-container">
+                    <a-scene embedded vr-mode-ui="enabled: false" loading-screen="enabled: false">
+                        <a-assets>
+                            <img id="sky-360" src="imagenes/4.jpeg" crossorigin="anonymous" preload="auto">
+                        </a-assets>
+                        
+                        <!-- Cámara con controles de cursor: permite hacer clic y arrastrar para mirar alrededor -->
+                        <a-entity camera look-controls="reverseMouseDrag: false; touchEnabled: true; pointerLockEnabled: false" position="0 1.6 0"></a-entity>
+                        
+                        <!-- Sky con la imagen 360 -->
+                        <a-sky src="#sky-360" rotation="0 0 0"></a-sky>
+                    </a-scene>
+                </div>
+            </div>
+            <div class="content">
+                <div class="card-info visible" style="border-left-color: var(--accent);">
+                    <p><strong>Inspección remota:</strong> Supervisa instalaciones sin desplazamientos.<br>
+                    <strong>Capacitación técnica:</strong> Entrena personal en entornos virtuales reales.<br>
+                    <strong>Presentaciones inmersivas:</strong> Muestra proyectos e infraestructuras con alto impacto visual.<br>
+                    <strong>Inventario visual georreferenciado:</strong> Organiza activos por ubicación para acceso rápido.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🥽 Experiencia de visualización + Imagen -->
+    <section class="section-plain">
+        <h2 class="section-title">🥽 Experiencia de visualización</h2>
+        <div class="dual-section">
+            <div class="content">
+                <div class="card-info visible" style="border-left-color: #ff00c1;">
+                    <p><strong>Vista Web y Móvil:</strong> Accede a tus recursos inmersivos desde cualquier dispositivo sin instalaciones complejas.<br>
+                    <strong>Realidad Virtual:</strong> Explora espacios y escenas en modo inmersivo utilizando visores VR.<br>
+                    <strong>Realidad Aumentada:</strong> Visualiza modelos 3D GLB superpuestos en el entorno real mediante lentes o dispositivos compatibles.</p>
+                </div>
+            </div>
+            <div class="media">
+                <img src="imagenes/5.png" alt="VR Experience" style="max-width: 100%; border-radius: 10px; border: 2px solid var(--accent);">
+            </div>
+        </div>
+    </section>
+
+    <!-- 📞 Solicita una demostración (MEJORADA) -->
+    <section class="section-plain" style="text-align: center;">
+        <h2 class="section-title">📞 Solicita una demostración</h2>
+        <p style="font-size: 20px; margin-bottom: 30px; color: #fff;">Descubre cómo Kuntur-VR puede transformar la gestión visual de tus proyectos.</p>
+        
+        <!-- Tarjetas destacadas -->
+        <div class="demo-showcase">
+            <div class="demo-card">
+                <div class="demo-icon">🎯</div>
+                <h3>Demo personalizada</h3>
+                <p>Recibe una sesión interactiva enfocada en las necesidades de tu operación minera.</p>
+            </div>
+            <div class="demo-card">
+                <div class="demo-icon">🤝</div>
+                <h3>Asesoría experta</h3>
+                <p>Nuestro equipo te guiará en la implementación de gemelos digitales y entrenamiento VR.</p>
+            </div>
+            <div class="demo-card">
+                <div class="demo-icon">🚀</div>
+                <h3>Implementación inmersiva</h3>
+                <p>Te acompañamos desde el piloto hasta la integración total con tus procesos actuales.</p>
+            </div>
+        </div>
+
+        <!-- Bloque WhatsApp con botón funcional -->
+        <div class="whatsapp-block">
+            <div class="whatsapp-label">📱 Consultas por WhatsApp</div>
+            <div class="whatsapp-contact">
+                <span>Mauro Calero</span> +51 976 356 230
+            </div>
+            <a href="https://wa.me/51976356230?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20KunturVR" target="_blank" class="btn-whatsapp">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C6.477 2 2 6.477 2 12c0 1.88.523 3.68 1.505 5.25L2 22l4.75-1.505A9.958 9.958 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.48 0-2.88-.4-4.09-1.09l-.31-.18-3.05.97.97-3.05-.18-.31C5.4 14.88 5 13.48 5 12c0-3.86 3.14-7 7-7s7 3.14 7 7-3.14 7-7 7zm3.2-9.1c-.2-.4-.5-.7-.9-.9-.2-.1-.5-.1-.9-.1-.3 0-.6.1-1.2.5-.2.1-.3.3-.5.4-.2.1-.4.1-.5 0-.3-.1-.7-.3-1.1-.7-.3-.3-.5-.7-.6-1 0-.2 0-.4.1-.5.1-.1.1-.2.1-.3 0-.1 0-.2-.1-.3-.1-.1-.3-.3-.5-.4-.1-.1-.3-.2-.5-.2h-.3c-.3 0-.6.1-.9.3-.2.2-.5.5-.7.8-.3.4-.4.8-.4 1.3 0 .7.3 1.4.7 1.9 1 1.3 2.4 2.1 3.8 2.5.4.1.8.2 1.2.2.5 0 1-.1 1.4-.4.4-.2.8-.5 1-1 .1-.3.1-.5.1-.8 0-.2-.1-.5-.3-.7z'/%3E%3C/svg%3E" style="width:22px; height:22px;" alt="WhatsApp"> 
+                Escribir a WhatsApp
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 KunturVR Systems - King Software SAC</p>
+        <p style="font-size: 11px; margin-top: 5px; color: #00d4ff; text-transform: uppercase; letter-spacing: 2px;"></p>
+    </footer>
+
+    <script>
+        // Script para animar las tarjetas
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card-info');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 200);
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+
+</body>
+</html>
