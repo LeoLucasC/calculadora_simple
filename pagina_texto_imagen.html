@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>KUNTUR-XR</title>
+
+<script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+<style>
+
+body{
+  margin:0;
+  font-family:Segoe UI,Arial;
+  background:#111;
+}
+
+#panel{
+  position:absolute;
+  top:15px;
+  left:15px;
+  width:290px;
+  background:rgba(0,0,0,0.7); /* Transparencia 70% */
+  color:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 20px rgba(0,0,0,0.6);
+  z-index:10;
+  max-height:90vh;
+  overflow:auto; /* Scroll si hay muchos elementos */
+}
+
+#panelRight{
+  position:absolute;
+  top:15px;
+  right:15px;
+  width:290px;
+  background:rgba(0,0,0,0.7);
+  color:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 20px rgba(0,0,0,0.6);
+  z-index:10;
+  max-height:90vh;
+  overflow:auto;
+}
+
+button{
+  background:white;
+  color:black;
+  border:none;
+  padding:6px 10px;
+  margin:3px;
+  border-radius:5px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+button:hover{
+  background:#ddd;
+}
+
+select,input[type=range]{
+  width:100%;
+  margin-top:5px;
+  margin-bottom:5px;
+}
+
+.section{
+  margin-top:15px;
+}
+
+#lista{
+  margin-top:10px;
+  max-height:350px; /* Tamaño fijo para 10 elementos aprox */
+  overflow:auto;
+  border:1px solid #444;
+  padding:5px;
+  border-radius:5px;
+}
+
+.item{
+  padding:5px;
+  border-bottom:1px solid #333;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.item:hover{
+  background:#222;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Panel Izquierdo -->
+<div id="panel">
+<h2>KUNTUR-XR</h2>
+
+<div class="section">
+<button onclick="agregarTexto()">Agregar Texto</button>
+</div>
+
+<div class="section">
+<b>Agregar Imagen</b>
+<select id="comboImagen">
+<option value="#img1">Imagen 1</option>
+<option value="#img2">Imagen 2</option>
+<option value="#img3">Imagen 3</option>
+</select>
+<button onclick="agregarImagen()">Agregar Imagen</button>
+</div>
+
+<div class="section">
+<b>Escalar Imagen</b><br>
+<button onclick="escalar(0.2)">+</button>
+<button onclick="escalar(-0.2)">-</button>
+</div>
+
+<div class="section">
+<b>Mover</b><br>
+<button onclick="mover(-0.3,0)">⬅</button>
+<button onclick="mover(0.3,0)">➡</button>
+<button onclick="mover(0,0.3)">⬆</button>
+<button onclick="mover(0,-0.3)">⬇</button>
+</div>
+
+<div class="section">
+<b>Profundidad</b><br>
+<button onclick="profundidad(-0.3)">Atrás</button>
+<button onclick="profundidad(0.3)">Adelante</button>
+</div>
+
+<div class="section">
+<b>Giro Horizontal (sobre sí mismo)</b><br>
+<button onclick="rotarY(-5)">⟲</button>
+<button onclick="rotarY(5)">⟳</button>
+</div>
+
+<div class="section">
+<b>Giro Vertical (inclinar)</b><br>
+<button onclick="rotarX(5)">⬆</button>
+<button onclick="rotarX(-5)">⬇</button>
+</div>
+
+<div class="section">
+<b>Órbita Horizontal</b><br>
+<button onclick="orbitarHorizontal(-5)">⟲</button>
+<button onclick="orbitarHorizontal(5)">⟳</button>
+</div>
+
+<div class="section">
+<b>Órbita Vertical</b><br>
+<button onclick="orbitarVertical(5)">⬆</button>
+<button onclick="orbitarVertical(-5)">⬇</button>
+</div>
+
+<div class="section">
+<b>Color Texto</b>
+<select onchange="cambiarColor(this.value)">
+<option value="white">Blanco</option>
+<option value="yellow">Amarillo</option>
+<option value="red">Rojo</option>
+<option value="green">Verde</option>
+<option value="blue">Azul</option>
+<option value="black">Negro</option>
+</select>
+</div>
+
+<div class="section">
+<b>Tamaño Texto</b>
+<select onchange="cambiarTamano(this.value)">
+<option value="3">Pequeño</option>
+<option value="6">Normal</option>
+<option value="10">Grande</option>
+<option value="15">Gigante</option>
+</select>
+</div>
+
+
+
+</div>
+
+<!-- Panel Derecho -->
+<div id="panelRight">
+<h2>Audio Ambiente</h2>
+
+<div class="section">
+<input type="file" id="audioFile" accept="audio/mp3">
+<button onclick="cargarAudio()">Cargar MP3</button>
+<br>
+<button onclick="playAudio()">Play</button>
+<button onclick="stopAudio()">Stop</button>
+<button onclick="eliminarAudio()">Eliminar</button>
+<br><br>
+<b>Volumen</b>
+<input type="range" min="0" max="1" step="0.01" value="1" onchange="cambiarVolumen(this.value)">
+</div>
+<div class="section">
+<b>Lista de Elementos</b>
+<div id="lista"></div>
+</div>
+
+
+</div>
+
+<a-scene>
+<a-assets>
+<img id="foto360" src="foto360.jpg">
+<img id="img1" src="imagen/logo.jpg">
+<img id="img2" src="imagen/trinormaclaro.png">
+<img id="img3" src="imagen/trinormaoscuro.png">
+</a-assets>
+
+<a-sky src="#foto360"></a-sky>
+
+<a-entity camera look-controls position="0 1.6 0">
+<a-cursor raycaster="objects: .objeto"></a-cursor>
+</a-entity>
+</a-scene>
+
+<script>
+
+let textos=[]
+let seleccionado=null
+let contador=0
+let audioGlobal=null
+
+function agregarTexto(){
+    let contenido=prompt("Texto")
+    if(!contenido) return
+    let id="obj"+contador++
+    let entity=document.createElement("a-text")
+    entity.setAttribute("value",contenido)
+    entity.setAttribute("color","yellow")
+    entity.setAttribute("align","center")
+    entity.setAttribute("width","6")
+    entity.setAttribute("class","objeto")
+    entity.setAttribute("position","0 1.6 -3")
+    entity.setAttribute("id",id)
+    entity.addEventListener("click",function(){ seleccionar(id) })
+    document.querySelector("a-scene").appendChild(entity)
+    textos.push({id:id,texto:contenido})
+    actualizarLista()
+    seleccionar(id)
+}
+
+function agregarImagen(){
+    let src=document.getElementById("comboImagen").value
+    let id="obj"+contador++
+    let img=document.createElement("a-image")
+    img.setAttribute("src",src)
+    img.setAttribute("position","0 1.6 -3")
+    img.setAttribute("class","objeto")
+    img.setAttribute("id",id)
+    let tmpImg = new Image()
+    tmpImg.src = document.querySelector(src).getAttribute('src')
+    tmpImg.onload = function(){
+        let w = tmpImg.width
+        let h = tmpImg.height
+        let maxDimension = 2
+        if(w >= h){
+            img.setAttribute("scale", `${maxDimension} ${maxDimension*h/w} 1`)
+        } else {
+            img.setAttribute("scale", `${maxDimension*w/h} ${maxDimension} 1`)
+        }
+    }
+    img.addEventListener("click",function(){ seleccionar(id) })
+    document.querySelector("a-scene").appendChild(img)
+    textos.push({id:id,texto:"Imagen"})
+    actualizarLista()
+    seleccionar(id)
+}
+
+
+
+function actualizarLista(){
+    let lista=document.getElementById("lista")
+    lista.innerHTML=""
+    textos.forEach((t,i)=>{
+        let div=document.createElement("div")
+        div.className="item"
+        // Agregamos botón Editar
+        div.innerHTML=`
+            <span>${t.texto}</span>
+            <div>
+                <button onclick="seleccionar('${t.id}')">✏</button>
+                <button onclick="eliminar('${t.id}')">🗑</button>
+            </div>
+        `
+        lista.appendChild(div)
+    })
+    // Activar scroll si hay más de 10 elementos
+    lista.style.overflow = textos.length > 10 ? "auto" : "hidden"
+}
+
+function seleccionar(id){
+    seleccionado=id
+    document.querySelectorAll("a-text").forEach(t=>{ t.setAttribute("color","yellow") })
+    let el=document.getElementById(id)
+    if(el && el.tagName=="A-TEXT") el.setAttribute("color","red")
+}
+
+function mover(x,y){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    let p=el.getAttribute("position")
+    p.x+=x; p.y+=y
+    el.setAttribute("position",p)
+}
+
+function profundidad(z){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    let p=el.getAttribute("position")
+    p.z+=z
+    el.setAttribute("position",p)
+}
+
+function rotarY(g){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    let r=el.getAttribute("rotation")
+    r.y+=g
+    el.setAttribute("rotation",r)
+}
+
+function rotarX(g){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    let r=el.getAttribute("rotation")
+    r.x+=g
+    el.setAttribute("rotation",r)
+}
+
+function orbitarHorizontal(grados){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    let p=el.getAttribute("position")
+    let r=Math.sqrt(p.x*p.x + p.z*p.z)
+    let angulo=Math.atan2(p.z,p.x)
+    angulo+=grados*Math.PI/180
+    p.x=r*Math.cos(angulo)
+    p.z=r*Math.sin(angulo)
+    el.setAttribute("position",p)
+}
+
+function orbitarVertical(grados){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    let p=el.getAttribute("position")
+    let r=Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z)
+    let theta=Math.atan2(p.y,Math.sqrt(p.x*p.x+p.z*p.z))
+    theta+=grados*Math.PI/180
+    let phi=Math.atan2(p.z,p.x)
+    p.x=r*Math.cos(theta)*Math.cos(phi)
+    p.y=r*Math.sin(theta)
+    p.z=r*Math.cos(theta)*Math.sin(phi)
+    el.setAttribute("position",p)
+}
+
+function escalar(v){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    if(el.tagName!="A-IMAGE") return
+    let s=el.getAttribute("scale")
+    s.x+=v; s.y+=v
+    el.setAttribute("scale",s)
+}
+
+function cambiarColor(c){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    if(el.tagName!="A-TEXT") return
+    el.setAttribute("color",c)
+}
+
+function cambiarTamano(s){ if(!seleccionado) return
+    let el=document.getElementById(seleccionado)
+    if(el.tagName!="A-TEXT") return
+    el.setAttribute("width",s)
+}
+
+function eliminar(id){
+    let el=document.getElementById(id)
+    if(el) el.parentNode.removeChild(el)
+    textos=textos.filter(t=>t.id!=id)
+    if(seleccionado==id) seleccionado=null
+    actualizarLista()
+}
+
+// ==== AUDIO ====
+function cargarAudio(){
+    let file=document.getElementById("audioFile").files[0]
+    if(!file){ alert("Selecciona un MP3"); return }
+    let url=URL.createObjectURL(file)
+    if(audioGlobal) audioGlobal.pause()
+    audioGlobal=new Audio(url)
+    audioGlobal.loop=true
+}
+
+function playAudio(){ if(audioGlobal) audioGlobal.play() }
+function stopAudio(){ if(audioGlobal){ audioGlobal.pause(); audioGlobal.currentTime=0 } }
+function eliminarAudio(){ if(audioGlobal){ audioGlobal.pause(); audioGlobal=null } }
+function cambiarVolumen(v){ if(audioGlobal) audioGlobal.volume=v }
+
+</script>
+
+</body>
+</html>
