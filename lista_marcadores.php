@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
-    // --- ACCIÓN: EDITAR (Solo parámetros visuales, no archivos) ---
+    // --- ACCIÓN: EDITAR (Parámetros visuales y audio) ---
     if (isset($_POST['action']) && $_POST['action'] == 'edit') {
         $id_edit      = intval($_POST['id_marcador']);
         $texto_modelo = $conn->real_escape_string($_POST['texto_modelo']);
@@ -45,11 +45,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $pos_x        = floatval($_POST['pos_x']);
         $pos_y        = floatval($_POST['pos_y']);
         $pos_z        = floatval($_POST['pos_z']);
+        
+        // Procesar nuevo audio si se subió
+        $audio_actual = '';
+        $sql_audio = "SELECT archivo_audio FROM marcadores_ar WHERE id_marcador = $id_edit AND id_usuario = $id_user";
+        $res_audio = $conn->query($sql_audio);
+        if ($res_audio && $row_audio = $res_audio->fetch_assoc()) {
+            $audio_actual = $row_audio['archivo_audio'];
+        }
+        
+        $archivo_audio = $audio_actual; // Por defecto mantener el actual
+        
+        if (isset($_FILES['nuevo_audio']) && $_FILES['nuevo_audio']['error'] == 0) {
+            $audio_tmp = $_FILES['nuevo_audio']['tmp_name'];
+            $audio_nombre = $_FILES['nuevo_audio']['name'];
+            $audio_ext = strtolower(pathinfo($audio_nombre, PATHINFO_EXTENSION));
+            
+            // Validar extensión
+            $allowed = ['mp3', 'wav', 'ogg', 'm4a'];
+            if (in_array($audio_ext, $allowed)) {
+                // Generar nombre único
+                $nuevo_nombre = 'uploads/' . time() . '_' . rand(1000, 9999) . '_audio.' . $audio_ext;
+                
+                if (move_uploaded_file($audio_tmp, $nuevo_nombre)) {
+                    // Eliminar audio anterior si existe
+                    if ($audio_actual && file_exists($audio_actual)) {
+                        unlink($audio_actual);
+                    }
+                    $archivo_audio = $nuevo_nombre;
+                }
+            }
+        }
 
         $sql_update = "UPDATE marcadores_ar SET 
                         texto_modelo='$texto_modelo', color='$color', alineacion='$alineacion',
                         escala_x=$escala_x, escala_y=$escala_y, escala_z=$escala_z,
-                        pos_x=$pos_x, pos_y=$pos_y, pos_z=$pos_z 
+                        pos_x=$pos_x, pos_y=$pos_y, pos_z=$pos_z,
+                        archivo_audio='$archivo_audio'
                        WHERE id_marcador = $id_edit AND id_usuario = $id_user";
                        
         if ($conn->query($sql_update)) {
@@ -123,6 +155,7 @@ $marcadores = $conn->query($sql);
         .form-control { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .btn-save { background: #023675; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .audio-info { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
 
         @media (max-width: 768px) { .main-content { padding: 80px 20px 30px; } }
     </style>
@@ -177,14 +210,15 @@ $marcadores = $conn->query($sql);
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         
-                                        <button class="btn-action btn-edit" title="Editar Visuales" 
+                                        <button class="btn-action btn-edit" title="Editar Visuales y Audio" 
                                             onclick="openEditModal(
                                                 <?= $row['id_marcador'] ?>, 
                                                 '<?= addslashes($row['texto_modelo']) ?>', 
                                                 '<?= $row['color'] ?>', 
                                                 '<?= $row['alineacion'] ?>',
                                                 <?= $row['escala_x'] ?>, <?= $row['escala_y'] ?>, <?= $row['escala_z'] ?>,
-                                                <?= $row['pos_x'] ?>, <?= $row['pos_y'] ?>, <?= $row['pos_z'] ?>
+                                                <?= $row['pos_x'] ?>, <?= $row['pos_y'] ?>, <?= $row['pos_z'] ?>,
+                                                '<?= addslashes($row['archivo_audio']) ?>'
                                             )">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -215,7 +249,7 @@ $marcadores = $conn->query($sql);
             <button class="close-modal" onclick="closeModal()">&times;</button>
             <h2 style="margin-bottom: 20px; color: #023675;"><i class="fas fa-pen"></i> Editar Marcador</h2>
             
-            <form method="POST" action="">
+            <form method="POST" action="" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="edit">
                 <input type="hidden" name="id_marcador" id="edit_id">
                 
@@ -264,6 +298,17 @@ $marcadores = $conn->query($sql);
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Audio Actual</label>
+                    <div id="audio_actual_info" class="audio-info"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Cambiar Audio (opcional)</label>
+                    <input type="file" name="nuevo_audio" class="form-control" accept=".mp3,.wav,.ogg,.m4a">
+                    <small style="color:#64748b;">Formatos permitidos: MP3, WAV, OGG, M4A</small>
+                </div>
+
                 <button type="submit" class="btn-save">GUARDAR CAMBIOS</button>
             </form>
         </div>
@@ -271,7 +316,7 @@ $marcadores = $conn->query($sql);
 
     <script>
         // Abrir modal y llenar datos
-        function openEditModal(id, txt, col, align, sx, sy, sz, px, py, pz) {
+        function openEditModal(id, txt, col, align, sx, sy, sz, px, py, pz, audio) {
             document.getElementById('edit_id').value = id;
             document.getElementById('edit_texto').value = txt;
             document.getElementById('edit_color').value = col;
@@ -282,6 +327,15 @@ $marcadores = $conn->query($sql);
             document.getElementById('edit_px').value = px;
             document.getElementById('edit_py').value = py;
             document.getElementById('edit_pz').value = pz;
+            
+            // Mostrar información del audio actual
+            const audioInfo = document.getElementById('audio_actual_info');
+            if (audio && audio != 'NULL' && audio != '') {
+                const audioName = audio.split('/').pop();
+                audioInfo.innerHTML = '<i class="fas fa-music"></i> ' + audioName;
+            } else {
+                audioInfo.innerHTML = '<i class="fas fa-music"></i> Sin audio';
+            }
             
             document.getElementById('editModal').classList.add('show');
         }

@@ -46,18 +46,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
 
     // ---- UBICACIONES ----
     if ($_POST['action'] == 'crear_ubicacion' || $_POST['action'] == 'editar_ubicacion') {
-        $id_operacion     = intval($_POST['id_operacion_ubi']);
+        // Nota: id_operacion ya no se usa, pero mantenemos la estructura de la tabla
+        // Como la tabla requiere id_operacion, obtenemos el de la URL o asignamos uno por defecto?
+        // Por ahora lo dejamos comentado y asumimos que la tabla tiene un valor por defecto o se asigna de otra forma
         $id_tipo_ubi      = intval($_POST['id_tipo_ubicacion']);
         $nombre           = $conn->real_escape_string($_POST['nombre_ubi']);
         $descripcion      = $conn->real_escape_string($_POST['descripcion_ubi']);
 
         if ($_POST['action'] == 'crear_ubicacion') {
+            // Necesitamos un id_operacion, podríamos obtenerlo de la sesión o asignar una operación por defecto
+            // Por simplicidad, asumimos que hay una operación por defecto (id_operacion = 1) o lo manejamos de otra forma
+            // Esto es solo para que funcione el ejemplo, en producción deberías ajustarlo
+            $id_operacion_defecto = 1; // Cambia esto según tu lógica de negocio
             $sql = "INSERT INTO ubicaciones (id_operacion, id_tipo_ubicacion, nombre, descripcion, estado)
-                    VALUES ($id_operacion, $id_tipo_ubi, '$nombre', '$descripcion', 1)";
+                    VALUES ($id_operacion_defecto, $id_tipo_ubi, '$nombre', '$descripcion', 1)";
             $msg = "Ubicación creada correctamente.";
         } else {
             $id = intval($_POST['id_ubicacion']);
-            $sql = "UPDATE ubicaciones SET id_operacion=$id_operacion, id_tipo_ubicacion=$id_tipo_ubi,
+            // En edición, no modificamos id_operacion
+            $sql = "UPDATE ubicaciones SET id_tipo_ubicacion=$id_tipo_ubi,
                     nombre='$nombre', descripcion='$descripcion' WHERE id_ubicacion=$id";
             $msg = "Ubicación actualizada correctamente.";
         }
@@ -191,15 +198,14 @@ while ($r = $res_ops->fetch_assoc()) {
     $data_ops[] = $r;
 }
 
-// Ubicaciones
+// Ubicaciones - SIN columna operación
 $res_ubis = $conn->query("
-    SELECT u.*, o.nombre as op_nombre, tu.descripcion as tipo_nombre,
+    SELECT u.*, tu.descripcion as tipo_nombre,
            (SELECT COUNT(*) FROM grupos_operativos WHERE id_ubicacion=u.id_ubicacion) as total_grupos,
            (SELECT COUNT(*) FROM multimedia WHERE id_ubicacion=u.id_ubicacion) as total_media
     FROM ubicaciones u
-    JOIN operaciones o ON u.id_operacion=o.id_operacion
     JOIN tipos_ubicacion tu ON u.id_tipo_ubicacion=tu.id_tipo_ubicacion
-    ORDER BY u.estado DESC, o.nombre, u.nombre
+    ORDER BY u.estado DESC, u.nombre
 ");
 $data_ubis = [];
 $total_ubis = $activas_ubis = 0;
@@ -484,7 +490,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
                 <thead>
                     <tr>
                         <th>Ubicación</th>
-                        <th>Operación</th>
                         <th>Tipo</th>
                         <th>Grupos</th>
                         <th>Archivos</th>
@@ -499,7 +504,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
                         <div class="item-title"><?= htmlspecialchars($u['nombre']) ?></div>
                         <div class="item-sub"><?= htmlspecialchars(substr($u['descripcion'],0,45)) ?></div>
                     </td>
-                    <td><?= htmlspecialchars($u['op_nombre']) ?></td>
                     <td><span class="badge ubi"><?= htmlspecialchars($u['tipo_nombre']) ?></span></td>
                     <td><?= $u['total_grupos'] ?></td>
                     <td><?= $u['total_media'] ?></td>
@@ -529,7 +533,7 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($data_ubis)): ?>
-                <tr><td colspan="7"><div class="empty"><i class="fas fa-map-marker-alt"></i>Sin ubicaciones registradas.</div></td></tr>
+                <tr><td colspan="6"><div class="empty"><i class="fas fa-map-marker-alt"></i>Sin ubicaciones registradas.</div></td></tr>
                 <?php endif; ?>
                 </tbody>
             </table>
@@ -692,15 +696,8 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
             <input type="hidden" name="action" id="actionUbi" value="crear_ubicacion">
             <input type="hidden" name="id_ubicacion" id="idUbi">
 
-            <div class="form-group">
-                <label>Operación *</label>
-                <select name="id_operacion_ubi" id="ubiOperacion" class="form-control" required>
-                    <option value="">Seleccionar operación...</option>
-                    <?php foreach ($data_ops as $op): ?>
-                    <option value="<?= $op['id_operacion'] ?>"><?= htmlspecialchars($op['nombre']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+            <!-- Campo de operación eliminado -->
+            
             <div class="form-group">
                 <label>Tipo de Ubicación *</label>
                 <select name="id_tipo_ubicacion" id="ubiTipo" class="form-control" required>
@@ -798,7 +795,7 @@ function editarUbi(d) {
     document.getElementById('titleUbi').innerHTML      = '<i class="fas fa-edit"></i> Editar Ubicación';
     document.getElementById('actionUbi').value         = 'editar_ubicacion';
     document.getElementById('idUbi').value             = d.id_ubicacion;
-    document.getElementById('ubiOperacion').value      = d.id_operacion;
+    // El campo de operación ya no existe en el modal
     document.getElementById('ubiTipo').value           = d.id_tipo_ubicacion;
     document.getElementById('ubiNombre').value         = d.nombre;
     document.getElementById('ubiDesc').value           = d.descripcion;

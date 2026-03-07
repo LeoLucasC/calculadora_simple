@@ -93,23 +93,12 @@ if (!empty($_SESSION['id_usuario'])) {
         gap: 12px;
     }
     
-    /* Logo circular con fondo blanco y logo1.png */
-    .sidebar .logo-circle {
-        width: 60px;
-        height: 60px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        overflow: hidden;
-    }
-    
-    .sidebar .logo-circle img {
-        width: 100%;
-        height: 100%;
+    /* Logo en tamaño normal (sin círculo) */
+    .sidebar .logo-container img {
+        max-width: 100%;
+        height: auto;
+        max-height: 80px;
+        width: auto;
         object-fit: contain;
     }
     
@@ -284,9 +273,7 @@ if (!empty($_SESSION['id_usuario'])) {
 
 <div class="sidebar" id="sidebar">
     <div class="logo-container">
-        <div class="logo-circle">
-            <img src="<?= htmlspecialchars($logo_empresa) ?>?t=<?= time() ?>" alt="Logo Empresa">
-        </div>
+        <img src="<?= htmlspecialchars($logo_empresa) ?>?t=<?= time() ?>" alt="Logo Empresa">
         <div class="logo-text">
             <?= htmlspecialchars($nombre_empresa) ?>
         </div>
@@ -306,10 +293,12 @@ if (!empty($_SESSION['id_usuario'])) {
     </div>
 
     <div class="menu">
+        <!-- 1. GALERÍA -->
         <a href="viewer_galeria.php" class="menu-item <?= ($pagina == 'viewer_galeria.php') ? 'active' : '' ?>">
             <i class="fas fa-images"></i> Galería
         </a>
         
+        <!-- 2. AR -->
         <div class="menu-item" onclick="toggleSubmenu('sub-ar')">
             <i class="fas fa-vr-cardboard"></i> AR
             <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
@@ -318,9 +307,35 @@ if (!empty($_SESSION['id_usuario'])) {
         <div class="submenu <?= ($pagina == 'subir_marcadores.php' || $pagina == 'entorno_ar.php' || $pagina == 'lista_marcadores.php' || $pagina == 'entorno_ar_viewer.php') ? 'show' : '' ?>" id="sub-ar">
             <a href="entorno_ar_viewer.php" 
                class="submenu-item <?= ($pagina == 'entorno_ar_viewer.php' || $pagina == 'entorno_ar.php') ? 'active' : '' ?>">
-                <i class="fas fa-cube"></i> Entorno AR Real
+                <i class="fas fa-cube"></i> Entorno AR con Marcadores
             </a>
         </div>
+        
+        <!-- 3. XR -->
+        <div class="menu-item" onclick="toggleSubmenu('sub-xr')">
+            <i class="fas fa-vr-cardboard"></i> XR
+            <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.8rem;"></i>
+        </div>
+
+        <div class="submenu <?= ($pagina == 'galeria_xr_foto_360.php' || $pagina == 'galeria_xr_video_360.php' || $pagina == 'galeria_xr_modelo_3d.php') ? 'show' : '' ?>" id="sub-xr">
+            <a href="galeria_xr_foto_360.php" 
+               class="submenu-item <?= ($pagina == 'galeria_xr_foto_360.php') ? 'active' : '' ?>">
+                <i class="fas fa-camera"></i> GALERIA XR FOTO 360
+            </a>
+            <a href="galeria_xr_video_360.php" 
+               class="submenu-item <?= ($pagina == 'galeria_xr_video_360.php') ? 'active' : '' ?>">
+                <i class="fas fa-video"></i> GALERIA XR VIDEO 360
+            </a>
+            <a href="galeria_xr_modelo_3d.php" 
+               class="submenu-item <?= ($pagina == 'galeria_xr_modelo_3d.php') ? 'active' : '' ?>">
+                <i class="fas fa-cube"></i> GALERIA XR MODELO 3D
+            </a>
+        </div>
+
+        <!-- 4. MI PERFIL (al final) -->
+        <a href="mi_perfil.php" class="menu-item <?= ($pagina == 'mi_perfil.php') ? 'active' : '' ?>">
+            <i class="fas fa-user"></i> Mi Perfil
+        </a>
     </div>
 
     <a href="logout.php" class="logout-btn">
