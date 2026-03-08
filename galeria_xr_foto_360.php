@@ -125,7 +125,8 @@ if ($res_proyectos && $res_proyectos->num_rows > 0) {
                 <img id="foto360" src="<?= htmlspecialchars($foto_inicial) ?>" crossorigin="anonymous"> 
             </a-assets>
 
-            <a-sky id="cielo360" src="#foto360" animation="property: rotation; to: 0 360 0; loop: true; dur: 150000; easing: linear;"></a-sky>
+            
+            <a-sky id="cielo360" src="#foto360"></a-sky>
 
             <a-entity camera look-controls="reverseMouseDrag: true" position="0 1.6 0">
                 <a-cursor color="#ffffff" scale="0.8 0.8 0.8" opacity="0.5"></a-cursor>
