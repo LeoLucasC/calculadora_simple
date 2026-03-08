@@ -36,7 +36,25 @@ if ($res_modelos) {
     }
 }
 // Seleccionamos el primer modelo o dejamos uno de prueba
-$modelo_inicial = (count($modelos_3d) > 0) ? $modelos_3d[0]['url_archivo'] : 'https://cdn.aframe.io/test-models/models/glTF-2.0/virtualcity/VC.gltf';
+
+// Escuchar si viene un id_media por la URL
+$id_modelo_solicitado = isset($_GET['id_media']) ? intval($_GET['id_media']) : null;
+$modelo_inicial = 'https://cdn.aframe.io/test-models/models/glTF-2.0/virtualcity/VC.gltf'; // Por defecto
+
+if (count($modelos_3d) > 0) {
+    if ($id_modelo_solicitado) {
+        // Buscar la URL que corresponda a ese ID
+        foreach ($modelos_3d as $m) {
+            if ($m['id_multimedia'] == $id_modelo_solicitado) {
+                $modelo_inicial = $m['url_archivo'];
+                break;
+            }
+        }
+    } else {
+        // Si no viene ID, cargar el primero de la lista
+        $modelo_inicial = $modelos_3d[0]['url_archivo'];
+    }
+}
 
 // --- Traer fotos NORMALES (Para usar como señaléticas) ---
 $sql_fotos = "SELECT m.id_multimedia, m.url_archivo, m.observaciones 
@@ -125,6 +143,10 @@ if ($res_fotos) {
     <div class="main-content">
         
         <div class="xr-panel" id="panel-tools">
+            
+            <a href="editor_xr.php" style="display: block; background: #334155; color: white; padding: 10px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: 600; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;" onmouseover="this.style.background='#ef4444'" onmouseout="this.style.background='#334155'">
+                <i class="fas fa-arrow-left"></i> Volver al Panel
+            </a>
 
             <h2><i class="fas fa-tools"></i> Herramientas XR</h2>
 
@@ -547,8 +569,11 @@ if ($res_fotos) {
 
         window.onload = function() {
             setTimeout(() => {
-                let inicial = document.getElementById("comboModeloPrincipal").value;
-                cambiarModeloPrincipal(inicial);
+                let urlInicial = "<?= htmlspecialchars($modelo_inicial) ?>";
+                // Forzar al select a ponerse en el modelo 3D que pidió el usuario por URL
+                document.getElementById("comboModeloPrincipal").value = urlInicial;
+                // Cargar el modelo 3D y sus elementos guardados
+                cambiarModeloPrincipal(urlInicial);
             }, 500);
         };
 

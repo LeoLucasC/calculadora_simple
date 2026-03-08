@@ -349,14 +349,8 @@ if (!empty($_SESSION['id_usuario'])) {
 
         <div class="submenu <?= ($pagina == 'editor_xr_foto_360.php' || $pagina == 'editor_xr_video_360.php' || $pagina == 'editor_xr_modelo_3d.php' || $pagina == 'galeria_xr_foto_360.php' || $pagina == 'galeria_xr_video_360.php' || $pagina == 'galeria_xr_modelo_3d.php') ? 'show' : '' ?>" id="sub-xr">
             <!-- EDITOR XR -->
-            <a href="editor_xr_foto_360.php" class="submenu-item <?= ($pagina == 'editor_xr_foto_360.php') ? 'active' : '' ?>">
-                <i class="fas fa-camera"></i> EDITOR XR FOTO 360
-            </a>
-            <a href="editor_xr_video_360.php" class="submenu-item <?= ($pagina == 'editor_xr_video_360.php') ? 'active' : '' ?>">
-                <i class="fas fa-video"></i> EDITOR XR VIDEO 360
-            </a>
-            <a href="editor_xr_modelo_3d.php" class="submenu-item <?= ($pagina == 'editor_xr_modelo_3d.php') ? 'active' : '' ?>">
-                <i class="fas fa-cube"></i> EDITOR XR MODELO 3D
+            <a href="editor_xr.php" class="submenu-item <?= ($pagina == 'editor_xr_foto_360.php' || $pagina == 'editor_xr_video_360.php' || $pagina == 'editor_xr_modelo_3d.php') ? 'active' : '' ?>">
+                <i class="fas fa-edit"></i> EDITOR XR
             </a>
             
             <!-- Separador visual (línea) -->

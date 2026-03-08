@@ -41,36 +41,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
         $_SESSION['flash_mensaje'] = $conn->query($sql) ? $msg : "Error SQL: ".$conn->error;
         $_SESSION['flash_tipo']    = $conn->affected_rows >= 0 && !$conn->error ? 'success' : 'error';
-        header("Location: admin_operaciones.php?tab=operaciones"); exit();
+        header("Location: admin_ubicacion.php?tab=operaciones"); exit();
     }
 
     // ---- UBICACIONES ----
     if ($_POST['action'] == 'crear_ubicacion' || $_POST['action'] == 'editar_ubicacion') {
-        // Nota: id_operacion ya no se usa, pero mantenemos la estructura de la tabla
-        // Como la tabla requiere id_operacion, obtenemos el de la URL o asignamos uno por defecto?
-        // Por ahora lo dejamos comentado y asumimos que la tabla tiene un valor por defecto o se asigna de otra forma
+        $id_operacion     = intval($_POST['id_operacion']); // Recuperamos el ID real de la operación
         $id_tipo_ubi      = intval($_POST['id_tipo_ubicacion']);
         $nombre           = $conn->real_escape_string($_POST['nombre_ubi']);
         $descripcion      = $conn->real_escape_string($_POST['descripcion_ubi']);
 
         if ($_POST['action'] == 'crear_ubicacion') {
-            // Necesitamos un id_operacion, podríamos obtenerlo de la sesión o asignar una operación por defecto
-            // Por simplicidad, asumimos que hay una operación por defecto (id_operacion = 1) o lo manejamos de otra forma
-            // Esto es solo para que funcione el ejemplo, en producción deberías ajustarlo
-            $id_operacion_defecto = 1; // Cambia esto según tu lógica de negocio
             $sql = "INSERT INTO ubicaciones (id_operacion, id_tipo_ubicacion, nombre, descripcion, estado)
-                    VALUES ($id_operacion_defecto, $id_tipo_ubi, '$nombre', '$descripcion', 1)";
+                    VALUES ($id_operacion, $id_tipo_ubi, '$nombre', '$descripcion', 1)";
             $msg = "Ubicación creada correctamente.";
         } else {
             $id = intval($_POST['id_ubicacion']);
-            // En edición, no modificamos id_operacion
-            $sql = "UPDATE ubicaciones SET id_tipo_ubicacion=$id_tipo_ubi,
+            $sql = "UPDATE ubicaciones SET id_operacion=$id_operacion, id_tipo_ubicacion=$id_tipo_ubi,
                     nombre='$nombre', descripcion='$descripcion' WHERE id_ubicacion=$id";
             $msg = "Ubicación actualizada correctamente.";
         }
+        
         $_SESSION['flash_mensaje'] = $conn->query($sql) ? $msg : "Error SQL: ".$conn->error;
         $_SESSION['flash_tipo']    = !$conn->error ? 'success' : 'error';
-        header("Location: admin_operaciones.php?tab=ubicaciones"); exit();
+        // OJO: Si tu archivo se llama admin_ubicaciones.php, cambia la redirección aquí:
+        header("Location: admin_ubicacion.php?tab=ubicaciones"); exit();
     }
 
     // ---- GRUPOS ----
@@ -92,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         }
         $_SESSION['flash_mensaje'] = $conn->query($sql) ? $msg : "Error SQL: ".$conn->error;
         $_SESSION['flash_tipo']    = !$conn->error ? 'success' : 'error';
-        header("Location: admin_operaciones.php?tab=grupos"); exit();
+        header("Location: admin_ubicacion.php?tab=grupos"); exit();
     }
 }
 
@@ -445,7 +440,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
     </div>
     <?php endif; ?>
 
-    <!-- Stats globales -->
     <div class="stats-row">
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-map-marker-alt"></i></div>
@@ -461,7 +455,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
         </div>
     </div>
 
-    <!-- TABS -->
     <div class="tabs-nav">
         <button class="tab-btn <?= $active_tab=='ubicaciones'?'active':'' ?>" onclick="switchTab('ubicaciones')">
             <i class="fas fa-map-marker-alt"></i> Ubicaciones
@@ -474,7 +467,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
         </button>
     </div>
 
-    <!-- ========== TAB: UBICACIONES ========== -->
     <div class="tab-pane <?= $active_tab=='ubicaciones'?'active':'' ?>" id="tab-ubicaciones">
         <div class="toolbar">
             <button class="btn-primary" onclick="abrirModal('modalUbi')">
@@ -540,7 +532,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
         </div>
     </div>
 
-    <!-- ========== TAB: GRUPOS ========== -->
     <div class="tab-pane <?= $active_tab=='grupos'?'active':'' ?>" id="tab-grupos">
         <div class="toolbar">
             <button class="btn-primary" onclick="abrirModal('modalGrupo')">
@@ -606,7 +597,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
         </div>
     </div>
 
-    <!-- ========== TAB: HISTORIAL ========== -->
     <div class="tab-pane <?= $active_tab=='historial'?'active':'' ?>" id="tab-historial">
 
         <div class="hist-filters">
@@ -683,20 +673,25 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
         </div>
     </div>
 
-</div><!-- /main-content -->
-
-<!-- ========== MODAL: UBICACION ========== -->
-<div class="modal-overlay" id="modalUbi">
+</div><div class="modal-overlay" id="modalUbi">
     <div class="modal-box">
         <div class="modal-head">
             <h2 id="titleUbi"><i class="fas fa-map-marker-alt"></i> Nueva Ubicación</h2>
             <button class="close-btn" onclick="cerrarModal('modalUbi')">&times;</button>
         </div>
-        <form method="POST" action="admin_operaciones.php">
+        <form method="POST" action="">
             <input type="hidden" name="action" id="actionUbi" value="crear_ubicacion">
             <input type="hidden" name="id_ubicacion" id="idUbi">
 
-            <!-- Campo de operación eliminado -->
+            <div class="form-group">
+                <label>Operación a la que pertenece *</label>
+                <select name="id_operacion" id="ubiOperacion" class="form-control" required>
+                    <option value="">Seleccionar operación...</option>
+                    <?php foreach ($data_ops as $op): ?>
+                    <option value="<?= $op['id_operacion'] ?>"><?= htmlspecialchars($op['nombre']) ?> (<?= htmlspecialchars($op['cliente_nombre']) ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             
             <div class="form-group">
                 <label>Tipo de Ubicación *</label>
@@ -723,7 +718,6 @@ $active_tab = $_GET['tab'] ?? 'ubicaciones';
     </div>
 </div>
 
-<!-- ========== MODAL: GRUPO ========== -->
 <div class="modal-overlay" id="modalGrupo">
     <div class="modal-box">
         <div class="modal-head">
@@ -795,7 +789,7 @@ function editarUbi(d) {
     document.getElementById('titleUbi').innerHTML      = '<i class="fas fa-edit"></i> Editar Ubicación';
     document.getElementById('actionUbi').value         = 'editar_ubicacion';
     document.getElementById('idUbi').value             = d.id_ubicacion;
-    // El campo de operación ya no existe en el modal
+    document.getElementById('ubiOperacion').value      = d.id_operacion; // Llenamos la operación
     document.getElementById('ubiTipo').value           = d.id_tipo_ubicacion;
     document.getElementById('ubiNombre').value         = d.nombre;
     document.getElementById('ubiDesc').value           = d.descripcion;

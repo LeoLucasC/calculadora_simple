@@ -36,7 +36,24 @@ if ($res_fotos) {
     }
 }
 // Seleccionamos la primera foto como predeterminada o dejamos la de prueba si la empresa no ha subido nada
-$foto_inicial = (count($fotos_360) > 0) ? $fotos_360[0]['url_archivo'] : 'https://aframe.io/aframe/examples/boilerplate/panorama/puydesancy.jpg';
+// Escuchar si viene un id_media por la URL
+$id_foto_solicitada = isset($_GET['id_media']) ? intval($_GET['id_media']) : null;
+$foto_inicial = 'https://aframe.io/aframe/examples/boilerplate/panorama/puydesancy.jpg'; // Por defecto
+
+if (count($fotos_360) > 0) {
+    if ($id_foto_solicitada) {
+        // Buscar la URL que corresponda a ese ID
+        foreach ($fotos_360 as $f) {
+            if ($f['id_multimedia'] == $id_foto_solicitada) {
+                $foto_inicial = $f['url_archivo'];
+                break;
+            }
+        }
+    } else {
+        // Si no viene ID, cargar la primera de la lista
+        $foto_inicial = $fotos_360[0]['url_archivo'];
+    }
+}
 
 // --- NUEVO: Traer fotos NORMALES y MODELOS 3D de la empresa ---
 $sql_elementos = "SELECT m.id_multimedia, m.url_archivo, m.observaciones, m.tipo_archivo 
@@ -119,11 +136,15 @@ if ($res_elementos) {
 
 <body>
 
-    <?php include 'includes/navbar_cliente.php'; ?>
+    
 
     <div class="main-content">
         
         <div class="xr-panel" id="panel-tools">
+
+            <a href="editor_xr.php" style="display: block; background: #334155; color: white; padding: 10px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: 600; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;" onmouseover="this.style.background='#ef4444'" onmouseout="this.style.background='#334155'">
+                <i class="fas fa-arrow-left"></i> Volver al Panel
+            </a>
 
             <h2><i class="fas fa-tools"></i> Herramientas XR</h2>
 
@@ -607,10 +628,12 @@ if ($res_elementos) {
 
         // --- INICIADOR AUTOMÁTICO ---
         window.onload = function() {
-            // Disparamos el cambio de fondo inicial para que cargue los elementos si la foto inicial tiene algo guardado
             setTimeout(() => {
-                let fondoInicial = document.getElementById("comboFondo360").value;
-                cambiarFondo360(fondoInicial);
+                let urlInicial = "<?= htmlspecialchars($foto_inicial) ?>";
+                // Forzar al select a ponerse en la foto que pidió el usuario por URL
+                document.getElementById("comboFondo360").value = urlInicial;
+                // Cargar el fondo y sus elementos guardados
+                cambiarFondo360(urlInicial);
             }, 500);
         };
 

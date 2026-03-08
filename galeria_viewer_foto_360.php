@@ -98,13 +98,24 @@ if ($res_proyectos && $res_proyectos->num_rows > 0) {
 
 <body>
 
-    <?php include 'includes/navar_viewer.php'; ?>
+    
 
     <div class="main-content">
+
+    <a href="viewer_galeria.php" style="display: block; background: #334155; color: white; padding: 10px; border-radius: 8px; text-decoration: none; text-align: center; font-weight: 600; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;" onmouseover="this.style.background='#ef4444'" onmouseout="this.style.background='#334155'">
+                <i class="fas fa-arrow-left"></i> Volver al Panel
+            </a>
+
+            
         
-        <div class="top-bar">
-            <h2>KUNTUR-XR</h2>
-            <p>Galería Interactiva 360°</p>
+        <div class="top-bar" style="display: flex; align-items: center; gap: 15px;">
+            <a href="dashboard_viewer.php" style="color: white; text-decoration: none; font-size: 1.2rem; padding-right: 15px; border-right: 1px solid rgba(255,255,255,0.2);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h2>KUNTUR-XR</h2>
+                <p>Galería Interactiva 360°</p>
+            </div>
         </div>
 
         <div class="slider-container">

@@ -590,6 +590,15 @@ $archivos = array_diff(scandir($directorio), array('..', '.'));
             }
         }
     </style>
+    <?php if(isset($_GET['status']) && $_GET['status'] == 'success'): ?>
+            <div style="background: #10b981; color: white; padding: 10px; text-align: center; margin-bottom: 15px; border-radius: 5px;">
+                ✅ Respaldo ZIP generado correctamente.
+            </div>
+        <?php elseif(isset($_GET['status']) && $_GET['status'] == 'error'): ?>
+            <div style="background: #ef4444; color: white; padding: 10px; text-align: center; margin-bottom: 15px; border-radius: 5px;">
+                ❌ Error al generar el respaldo.
+            </div>
+        <?php endif; ?>
 <body>
     <?php include 'includes/navbar_admin.php'; ?>
 
@@ -603,8 +612,8 @@ $archivos = array_diff(scandir($directorio), array('..', '.'));
             <div class="stat-card" onclick="location.href='includes/ejecutar_backup.php'" style="cursor:pointer; border: 2px solid #023675;">
                 <div class="stat-icon"><i class="fas fa-file-export"></i></div>
                 <div class="stat-info">
-                    <h4>Manual</h4>
-                    <div class="number" style="font-size:1.2rem;">Respaldar Ahora</div>
+                    <h4>Backup Completo</h4>
+                    <div class="number" style="font-size:1.1rem;">Generar ZIP (BD + Multimedia)</div>
                 </div>
             </div>
         </div>
