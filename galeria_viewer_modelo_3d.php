@@ -26,11 +26,7 @@ if ($res_modelos) {
 $modelo_inicial = (count($modelos_3d) > 0) ? $modelos_3d[0]['url_archivo'] : 'https://cdn.aframe.io/test-models/models/glTF-2.0/virtualcity/VC.gltf';
 
 // --- Traer TODOS los proyectos guardados (para cargar elementos 3D/Textos sobre el modelo) ---
-// --- Traer TODOS los proyectos guardados POR CUALQUIER USUARIO DE LA EMPRESA ---
-$sql_proyectos = "SELECT p.nombre_proyecto, p.json_config 
-                  FROM proyectos_xr p
-                  INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
-                  WHERE u.id_cliente = $id_cliente";
+$sql_proyectos = "SELECT nombre_proyecto, json_config FROM proyectos_xr WHERE id_usuario = $id_user";
 $res_proyectos = $conn->query($sql_proyectos);
 $proyectos_guardados = [];
 if ($res_proyectos && $res_proyectos->num_rows > 0) {
@@ -120,7 +116,7 @@ if ($res_proyectos && $res_proyectos->num_rows > 0) {
 
 <body>
 
-    <?php include 'includes/navbar_cliente.php'; ?>
+    <?php include 'includes/navar_viewer.php'; ?>
 
     <div class="main-content">
         

@@ -318,15 +318,15 @@ if (!empty($_SESSION['id_usuario'])) {
         </div>
 
         <div class="submenu <?= ($pagina == 'galeria_xr_foto_360.php' || $pagina == 'galeria_xr_video_360.php' || $pagina == 'galeria_xr_modelo_3d.php') ? 'show' : '' ?>" id="sub-xr">
-            <a href="galeria_xr_foto_360.php" 
+            <a href="galeria_viewer_foto_360.php" 
                class="submenu-item <?= ($pagina == 'galeria_xr_foto_360.php') ? 'active' : '' ?>">
                 <i class="fas fa-camera"></i> GALERIA XR FOTO 360
             </a>
-            <a href="galeria_xr_video_360.php" 
+            <a href="galeria_viewer_video_360.php" 
                class="submenu-item <?= ($pagina == 'galeria_xr_video_360.php') ? 'active' : '' ?>">
                 <i class="fas fa-video"></i> GALERIA XR VIDEO 360
             </a>
-            <a href="galeria_xr_modelo_3d.php" 
+            <a href="galeria_viewer_modelo_3d.php" 
                class="submenu-item <?= ($pagina == 'galeria_xr_modelo_3d.php') ? 'active' : '' ?>">
                 <i class="fas fa-cube"></i> GALERIA XR MODELO 3D
             </a>
